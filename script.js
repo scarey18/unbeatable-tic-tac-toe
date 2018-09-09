@@ -169,18 +169,20 @@ function Player(symbol, game) {
 	}
 
 	function evaluateBoard(opponent) {
-		if (this.game.moves === 1) return chooseSecondMove();
+		if (this.game.moves === 1 && this.game.firstMove === 5) {
+			return [1, 3, 7, 9][randomIndex(4)];
+		} else if (this.game.moves === 1) return 5;
 
-		// First, checks if there's a winning move to make or block
+		// Checks if there's a winning move to make or block
 		const mergedPatterns = this.patterns.concat(opponent.patterns);
 		const winningMoves = mergedPatterns.filter(p => p.length === 1);
 		if (winningMoves.length > 0) return winningMoves[0][0];
 
-		// Second, checks for traps (moves to complete two owned patterns at once)
+		// Checks for traps (moves to complete two owned patterns at once)
 		const potentialTraps = findCommonOccurrences(this.patterns);
 		if (potentialTraps.length > 0) return potentialTraps[0];
 
-		// Third, checks for potential opponent traps
+		// Checks for potential opponent traps
 		const potentialOppTraps = findCommonOccurrences(opponent.patterns);
 		if (potentialOppTraps.length === 1) return potentialOppTraps[0];
 
@@ -195,7 +197,7 @@ function Player(symbol, game) {
 			}
 		}
 
-		// Finally, scores cells and chooses best option
+		// Finally, scores potential moves and chooses best option
 		let index;
 		let maxScore = -2;
 		for (let num of this.game.cells) {
@@ -256,13 +258,6 @@ function copyPatterns(patterns) {
 		newPatterns.push([...pattern]);
 	}
 	return newPatterns;
-}
-
-function chooseSecondMove() {
-	if (game.firstMove === 5) {
-		return [1, 3, 7, 9][randomIndex(4)];
-	}
-	return 5;
 }
 
 function findCommonOccurrences(patterns) {
