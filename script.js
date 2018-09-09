@@ -48,7 +48,7 @@ startBtn.addEventListener('click', () => {
 	message.textContent = "You are " + player.symbol;
 
 	if (cpu.symbol === 'X') {
-		const cpuMove = game.cells[randomIndex(9)];
+		const cpuMove = random(game.cells);
 		cpu.makeMove(cpuMove, player);
 		document.getElementById(`cell-${cpuMove}`).textContent = 'X';
 	}
@@ -127,9 +127,8 @@ function Game() {
 	let cells = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 	// Potential winning combos- horizontal, vertical, and diagonal
-	let patterns = [[1, 2, 3], [4, 5, 6], [7, 8, 9], 
-				    [1, 4, 7], [2, 5, 8], [3, 6, 9], 
-				    [1, 5, 9], [3, 5, 7]];
+	let patterns = copyPatterns(PATTERNS);
+
 	return {moves, cells, patterns}
 }
 
@@ -170,46 +169,60 @@ function Player(symbol, game) {
 
 	function evaluateBoard(opponent) {
 		if (this.game.moves === 1 && this.game.firstMove === 5) {
-			return [1, 3, 7, 9][randomIndex(4)];
+			return random([1, 3, 7, 9]);
 		} else if (this.game.moves === 1) return 5;
 
 		// Checks if there's a winning move to make or block
-		const mergedPatterns = this.patterns.concat(opponent.patterns);
-		const winningMoves = mergedPatterns.filter(p => p.length === 1);
-		if (winningMoves.length > 0) return winningMoves[0][0];
+		for (let patterns of [this.patterns, opponent.patterns]) {
+			const winningMoves = patterns.filter(p => p.length === 1);
+			if (winningMoves.length > 0) {
+				// if (this === cpu) console.log('Winning moves:', winningMoves)
+				return random(random(winningMoves));
+			}
+		}
 
 		// Checks for traps (moves to complete two owned patterns at once)
 		const potentialTraps = findCommonOccurrences(this.patterns);
-		if (potentialTraps.length > 0) return potentialTraps[0];
+		if (potentialTraps.length > 0) {
+			// if (this === cpu) console.log('Potential traps:', potentialTraps);
+			return random(potentialTraps);
+		}
 
 		// Checks for potential opponent traps
 		const potentialOppTraps = findCommonOccurrences(opponent.patterns);
-		if (potentialOppTraps.length === 1) return potentialOppTraps[0];
+		if (potentialOppTraps.length === 1) {
+			// if (this === cpu) console.log('Potential opp traps:', potentialOppTraps);
+			return random(potentialOppTraps);
+		}
 
 		// If opponent has multiple potential traps, attempts to force a draw
 		if (potentialOppTraps.length > 1) {
+			const safeMoves = [];
 			for (let pattern of this.patterns) {
 				for (let i = 0; i <= 1; i++) {
 					const j = i === 0 ? 1 : 0;
 					if (!potentialOppTraps.includes(pattern[j])) 
-						return pattern[i];
+						safeMoves.push(pattern[i]);
 				}
 			}
+			// if (this === cpu) console.log('Safe moves', safeMoves)
+			return random(safeMoves);
 		}
 
 		// Finally, scores potential moves and chooses best option
-		let index;
+		let indexes;
 		let maxScore = -2;
 		for (let num of this.game.cells) {
 			const score = this.simulateMove(num, opponent);
-			if (score === 1) {
-				return num;
-			} else if (score > maxScore) {
-				index = num;
+			if (score > maxScore) {
+				indexes = [num];
 				maxScore = score;
+			} else if (score === maxScore) {
+				indexes.push(num);
 			}
 		}
-		return index;
+		// if (this === cpu) console.log(indexes, maxScore);
+		return random(indexes);
 	}
 
 	function simulateMove(num, opponent) {
@@ -276,6 +289,7 @@ function findCommonOccurrences(patterns) {
 	return commonOccurrences;
 }
 
-function randomIndex(length) {
-	return Math.floor(Math.random() * Math.floor(length));
+function random(arr) {
+	const index = Math.floor(Math.random() * Math.floor(arr.length));
+	return arr[index];
 }
