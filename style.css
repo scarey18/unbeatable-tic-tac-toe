@@ -44,6 +44,9 @@ html, * {
 	padding-left: 10px;
 	padding-right: 5px;
 }
+.title {
+	font-size: 3.5vmin;
+}
 #scoreboard {
 	font-size: 3.5vmin;
 	font-weight: bold;
