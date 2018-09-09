@@ -1,0 +1,63 @@
+<!DOCTYPEhtml>
+<html lang='en'>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>TicTacToe Ai</title>
+	<link href="https://fonts.googleapis.com/css?family=Orbitron:400,700" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+	<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body>
+	
+	<div class="hero">
+		<div class="hero-body">
+			<div class="container">
+
+				<div class="level">
+					<h1 class="level-item title has-text-light" id="message">Welcome!</h1>
+				</div>
+
+				<div class="level is-mobile has-text-light" id="scoreboard">
+					<div class="level-item has-text-centered">
+						<div>
+							<p id="player-symbol" data-symbol="X">Player</p>
+							<p id="player-score">0</p>
+						</div>
+					</div>
+					<div class="level-item has-text-centered">
+						<div>
+							<p id="cpu-symbol" data-symbol="O">CPU</p>
+							<p id="cpu-score">0</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="board has-text-light">
+					<div class="cell no-bottom-border no-right-border has-text-centered highlighted" id="cell-1" data-index=1>T</div>
+					<div class="cell no-bottom-border no-right-border has-text-centered" id="cell-2" data-index=2>I</div>
+					<div class="cell no-bottom-border has-text-centered" id="cell-3" data-index=3>C</div>
+					<div class="cell no-bottom-border no-right-border has-text-centered highlighted" id="cell-4" data-index=4>T</div>
+					<div class="cell no-bottom-border no-right-border has-text-centered" id="cell-5" data-index=5>A</div>
+					<div class="cell no-bottom-border has-text-centered" id="cell-6" data-index=6>C</div>
+					<div class="cell no-right-border has-text-centered highlighted" id="cell-7" data-index=7>T</div>
+					<div class="cell no-right-border has-text-centered" id="cell-8" data-index=8>O</div>
+					<div class="cell has-text-centered" id="cell-9" data-index=9>E</div>
+				</div>
+
+				<div class="level is-mobile has-text-light" id="start-button-level">	
+					<button class="level-item button is-large is-link" id="start-button">Start game</button>					
+				</div>
+
+				<div class="level is-mobile has-text-light" id="option-buttons">
+					<button class="level-item button option is-selected is-size-6 is-size-7-mobile" id="go-first" data-symbol="X">Go first (X)</button>
+					<button class="level-item button option is-size-6 is-size-7-mobile" id="go-second" data-symbol="O">Go second (O)</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+<script src="script.js"></script>
+</body>
+</html>
