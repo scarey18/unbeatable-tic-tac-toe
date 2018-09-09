@@ -19,7 +19,7 @@ let gameOver = false;
 
 // EVENT LISTENERS
 
-for (let button of [goFirstBtn, goSecondBtn]) {
+[goFirstBtn, goSecondBtn].forEach(button => {
 	button.addEventListener('click', () => {
 		if (button.classList.contains("is-selected")) return;
 
@@ -30,16 +30,16 @@ for (let button of [goFirstBtn, goSecondBtn]) {
 		playerSymbol.dataset.symbol = button.dataset.symbol;
 		cpuSymbol.dataset.symbol = otherBtn.dataset.symbol;
 	});
-}
+});
 
 
 startBtn.addEventListener('click', () => {
-	[startBtn, goFirstBtn, goSecondBtn].map(b => b.disabled = true);
+	[startBtn, goFirstBtn, goSecondBtn].forEach(b => b.disabled = true);
 
-	for (let cell of cells) {
+	cells.forEach(cell => {
 		cell.textContent = '';
 		cell.classList.remove('highlighted');
-	}
+	});
 
 	game = Game()
 	player = Player(playerSymbol.dataset.symbol, game);
@@ -55,7 +55,7 @@ startBtn.addEventListener('click', () => {
 });
 
 
-for (let cell of cells) {
+cells.forEach(cell => {
 	cell.addEventListener('click', () => {
 		if (cell.textContent !== '' || gameOver) return;
 
@@ -79,11 +79,11 @@ for (let cell of cells) {
 			return endGame(gameState);
 		}
 	});
-}
+});
 
 function endGame(gameState) {
 	gameOver = true;
-	[startBtn, goFirstBtn, goSecondBtn].map(b => b.disabled = false);
+	[startBtn, goFirstBtn, goSecondBtn].forEach(b => b.disabled = false);
 
 	switch (gameState) {
 		case "draw":
@@ -101,33 +101,33 @@ function endGame(gameState) {
 }
 
 function highlightSquares(cell) {
-	const index = parseInt(cell.dataset.index)
-	const symbol = cell.textContent
+	const index = parseInt(cell.dataset.index);
+	const symbol = cell.textContent;
 
-	for (let pattern of PATTERNS.filter(p => p.includes(index))) {
+	PATTERNS.filter(p => p.includes(index)).forEach(pattern => {
 		const cellsInARow = [cell];
-		for (let num of pattern.filter(n => n !== index)) {
+
+		pattern.filter(n => n !== index).forEach(num => {
 			const cell2 = document.getElementById(`cell-${num}`);
 			if (cell2.textContent === symbol) cellsInARow.push(cell2);
-		}
-		if (cellsInARow.length === 3) {
-			cellsInARow.map(c => c.classList.add('highlighted'));
-			return;
-		}
-	}
+		});
+
+		if (cellsInARow.length === 3) 
+			cellsInARow.forEach(c => c.classList.add('highlighted'));
+	});
 }
 
 
 // GAME LOGIC
 
 function Game() {
-	let moves = 0;
+	const moves = 0;
 	
 	// Represents empty cells
-	let cells = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+	const cells = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 	// Potential winning combos- horizontal, vertical, and diagonal
-	let patterns = copyPatterns(PATTERNS);
+	const patterns = copyPatterns(PATTERNS);
 
 	return {moves, cells, patterns}
 }
@@ -136,30 +136,26 @@ function Game() {
 function Player(symbol, game) {
 
 	// Represents patterns the player has started to complete
-	let patterns = [];
+	const patterns = [];
 
 	function makeMove(index, opponent) {
 		// If player's own pattern contains cell, remove cell from pattern
-		for (let pattern of this.patterns.filter(p => p.includes(index))) {
+		for (const pattern of this.patterns.filter(p => p.includes(index))) {
 			pattern.splice(pattern.indexOf(index), 1);
 			if (pattern.length === 0) return this;
 		}
 
 		// If unowned pattern contains cell, splice pattern and add it to player
-		for (let i = this.game.patterns.length - 1; i >= 0; i--) {
-			const pattern = this.game.patterns[i];
-			if (pattern.includes(index)) {
-				pattern.splice(pattern.indexOf(index), 1);
-				this.game.patterns.splice(i, 1);
-				this.patterns.push(pattern);
-			}
-		}
+		this.game.patterns.filter(p => p.includes(index)).forEach(pattern => {
+			pattern.splice(pattern.indexOf(index), 1);
+			this.game.patterns.splice(this.game.patterns.indexOf(pattern), 1);
+			this.patterns.push(pattern);
+		});
 
 		// If opponent's pattern contains cell, remove the pattern entirely
-		for (let i = opponent.patterns.length - 1; i >= 0; i--) {
-			if (opponent.patterns[i].includes(index)) 
-				opponent.patterns.splice(i, 1);
-		}
+		opponent.patterns.filter(p => p.includes(index)).forEach(pattern => {
+			opponent.patterns.splice(opponent.patterns.indexOf(pattern), 1);
+		});
 
 		this.game.cells.splice(this.game.cells.indexOf(index), 1);
 		if (this.game.cells.length === 0) return 'draw';
@@ -168,60 +164,47 @@ function Player(symbol, game) {
 	}
 
 	function evaluateBoard(opponent) {
-		if (this.game.moves === 1 && this.game.firstMove === 5) {
+		if (this.game.moves === 1 && this.game.firstMove === 5)
 			return random([1, 3, 7, 9]);
-		} else if (this.game.moves === 1) return 5;
+		else if (this.game.moves === 1) return 5;
 
 		// Checks if there's a winning move to make or block
-		for (let patterns of [this.patterns, opponent.patterns]) {
+		for (const patterns of [this.patterns, opponent.patterns]) {
 			const winningMoves = patterns.filter(p => p.length === 1);
-			if (winningMoves.length > 0) {
-				// if (this === cpu) console.log('Winning moves:', winningMoves)
-				return random(random(winningMoves));
-			}
+			if (winningMoves.length > 0) return random(random(winningMoves));
 		}
 
 		// Checks for traps (moves to complete two owned patterns at once)
 		const potentialTraps = findCommonOccurrences(this.patterns);
-		if (potentialTraps.length > 0) {
-			// if (this === cpu) console.log('Potential traps:', potentialTraps);
-			return random(potentialTraps);
-		}
+		if (potentialTraps.length > 0) return random(potentialTraps);
 
 		// Checks for potential opponent traps
 		const potentialOppTraps = findCommonOccurrences(opponent.patterns);
-		if (potentialOppTraps.length === 1) {
-			// if (this === cpu) console.log('Potential opp traps:', potentialOppTraps);
-			return random(potentialOppTraps);
-		}
+		if (potentialOppTraps.length === 1) return random(potentialOppTraps);
 
 		// If opponent has multiple potential traps, attempts to force a draw
 		if (potentialOppTraps.length > 1) {
 			const safeMoves = [];
-			for (let pattern of this.patterns) {
-				for (let i = 0; i <= 1; i++) {
-					const j = i === 0 ? 1 : 0;
-					if (!potentialOppTraps.includes(pattern[j])) 
-						safeMoves.push(pattern[i]);
-				}
-			}
-			// if (this === cpu) console.log('Safe moves', safeMoves)
+			this.patterns.forEach(pattern => {
+				pattern.forEach(num => {
+					const otherNum = pattern.filter(n => n !== num)[0];
+					if (!potentialOppTraps.includes(otherNum)) 
+						safeMoves.push(num);
+				});
+			});
 			return random(safeMoves);
 		}
 
 		// Finally, scores potential moves and chooses best option
 		let indexes;
 		let maxScore = -2;
-		for (let num of this.game.cells) {
+		this.game.cells.forEach(num => {
 			const score = this.simulateMove(num, opponent);
 			if (score > maxScore) {
 				indexes = [num];
 				maxScore = score;
-			} else if (score === maxScore) {
-				indexes.push(num);
-			}
-		}
-		// if (this === cpu) console.log(indexes, maxScore);
+			} else if (score === maxScore) indexes.push(num);
+		});
 		return random(indexes);
 	}
 
@@ -240,11 +223,9 @@ function Player(symbol, game) {
 			gameState = currentPlayer.makeMove(move, currentOpp);
 		}
 
-		if (gameState === 'draw') {
-			return 0;
-		} else if (currentPlayer === newPlayer) {
-			return 1;
-		} else return -1;
+		if (gameState === 'draw') return 0;
+		else if (currentPlayer === newPlayer) return 1;
+		else return -1;
 	}
 
 	return {symbol, game, patterns, makeMove, evaluateBoard, simulateMove};
@@ -267,25 +248,20 @@ function copyPlayer(player, game) {
 
 function copyPatterns(patterns) {
 	const newPatterns = [];
-	for (let pattern of patterns) {
-		newPatterns.push([...pattern]);
-	}
+	patterns.forEach(p => newPatterns.push([...p]));
 	return newPatterns;
 }
 
 function findCommonOccurrences(patterns) {
 	const nums = [];
 	const commonOccurrences = [];
-
-	for (let pattern of patterns) {
-		for (let num of pattern) {
-			if (!nums.includes(num)) {
-				nums.push(num);
-			} else if (!commonOccurrences.includes(num)) {
+	patterns.forEach(pattern => {
+		pattern.forEach(num => {
+			if (!nums.includes(num)) nums.push(num);
+			else if (!commonOccurrences.includes(num))
 				commonOccurrences.push(num);
-			}
-		}
-	}
+		});
+	});
 	return commonOccurrences;
 }
 
