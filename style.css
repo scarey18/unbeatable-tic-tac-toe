@@ -3,10 +3,10 @@ html, * {
 	font-family: 'Orbitron', sans-serif;
 }
 .board {
-	width: 60vw;
-	height: 60vw;
-	max-width: 472px;
-	max-height: 472px;
+	width: 65vw;
+	height: 65vw;
+	max-width: 500px;
+	max-height: 500px;
 	display: grid;
 	grid-template: repeat(3, 1fr) / repeat(3, 1fr);
 	margin-left: auto;

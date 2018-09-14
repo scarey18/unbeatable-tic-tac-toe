@@ -41,7 +41,7 @@ startBtn.addEventListener('click', () => {
 		cell.classList.remove('highlighted');
 	});
 
-	game = Game()
+	game = Game();
 	player = Player(playerSymbol.dataset.symbol, game);
 	cpu = Player(cpuSymbol.dataset.symbol, game);
 	gameOver = false;
@@ -127,7 +127,7 @@ function Game() {
 	const cells = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 	// Potential winning combos- horizontal, vertical, and diagonal
-	const patterns = copyPatterns(PATTERNS);
+	const patterns = PATTERNS.map(p => [...p]);
 
 	return {moves, cells, patterns}
 }
@@ -156,6 +156,8 @@ function Player(symbol, game) {
 		opponent.patterns.filter(p => p.includes(index)).forEach(pattern => {
 			opponent.patterns.splice(opponent.patterns.indexOf(pattern), 1);
 		});
+
+		opponent.patterns.filter(p => p.includes(index)).forEach(pattern => opponent.patterns.splice(opponent.patterns.indexOf(pattern, 1)));
 
 		this.game.cells.splice(this.game.cells.indexOf(index), 1);
 		if (this.game.cells.length === 0) return 'draw';
@@ -193,7 +195,7 @@ function Player(symbol, game) {
 				});
 			});
 			return random(safeMoves);
-		}
+	}
 
 		// Finally, scores potential moves and chooses best option
 		let indexes;
@@ -236,20 +238,14 @@ function copyGame(game) {
 	const newGame = Game();
 	newGame.moves = game.moves;
 	newGame.cells = [...game.cells];
-	newGame.patterns = copyPatterns(game.patterns);
+	newGame.patterns = game.patterns.map(p => [...p]);
 	return newGame;
 }
 
 function copyPlayer(player, game) {
 	const newPlayer = Player(player.symbol, game);
-	newPlayer.patterns = copyPatterns(player.patterns);
+	newPlayer.patterns = player.patterns.map(p => [...p]);
 	return newPlayer;
-}
-
-function copyPatterns(patterns) {
-	const newPatterns = [];
-	patterns.forEach(p => newPatterns.push([...p]));
-	return newPatterns;
 }
 
 function findCommonOccurrences(patterns) {
